@@ -1,13 +1,14 @@
-
 from bottle import route, run, response
 from time import sleep
-
 import configparser, thread, requests, sys, bottle
+from src import api 
+
 config = configparser.ConfigParser()
 config.read('config.ini')
 bhost = config.get('bottle','host')
 bport = config.getint('bottle','port')
 bdebug = config.getboolean('bottle','debug')
+
 class EnableCors(object):
   name = 'enable_cors'
   api = 2
