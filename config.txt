@@ -1,2 +1,7 @@
 # rename to config.ini
 
+[bottle]
+host:localhost
+port:8800
+debug:True
+
