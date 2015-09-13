@@ -1,5 +1,5 @@
 from cassandra.cluster import Cluster
-import random
+import random, os
 
 ks = ''.join(random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(16))
 
@@ -14,15 +14,12 @@ def test_insert():
   session.execute(kscql)
 
   session = cluster.connect(ks)
-  session.execute("""
-  CREATE TABLE users (
-  firstname text,
-  lastname text,
-  age int,
-  email text,
-  city text,
-  PRIMARY KEY (lastname));
-  """)
+
+  for name in os.listdir("cassandra"):
+    if name.endswith(".cql"):
+      with open("cassandra/" + name) as f:
+          out = f.read()
+          session.execute(out)
 
   session.execute("""
   INSERT INTO users (firstname, lastname, age, email, city) VALUES ('John', 'Smith', 46, 'johnsmith@email.com', 'Sacramento');
