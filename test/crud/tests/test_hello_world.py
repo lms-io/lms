@@ -22,21 +22,20 @@ def test_insert():
           session.execute(out)
 
   session.execute("""
-  INSERT INTO users (firstname, lastname, age, email, city) VALUES ('John', 'Smith', 46, 'johnsmith@email.com', 'Sacramento');
+  INSERT INTO user (username, password) VALUES ('joe', 'bcrypt');
           """)
 
   session.execute("""
-  INSERT INTO users (firstname, lastname, age, email, city) VALUES ('Jane', 'Doe', 36, 'janedoe@email.com', 'Beverly Hills');
+  INSERT INTO user (username, password) VALUES ('frank', 'bcrypt');
           """)
 
   session.execute("""
-  INSERT INTO users (firstname, lastname, age, email, city) VALUES ('Rob', 'Byrne', 24, 'robbyrne@email.com', 'San Diego');
+  INSERT INTO user (username, password) VALUES ('larry', 'bcrypt');
           """)
-
-  rows = session.execute('SELECT lastname, firstname, age FROM users')
+  rows = session.execute('SELECT username, password FROM user')
   d = [] 
   for r in rows:
-      d.insert(0,{'lastname':r.lastname,'firstname':r.firstname,'age':r.age})
+      d.insert(0,{'username':r.username,'password':r.password})
   print d
 
 
