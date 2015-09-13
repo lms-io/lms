@@ -1,14 +1,19 @@
 from cassandra.cluster import Cluster
+import random
+
+ks = ''.join(random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(16))
 
 def test_insert():
   cluster = Cluster()
   session = cluster.connect()
-  session.execute("""
-  CREATE KEYSPACE myfirsttest
+  kscql = """
+  CREATE KEYSPACE %s 
   WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };
-  """)
+  """ % (ks)
 
-  session = cluster.connect('myfirsttest')
+  session.execute(kscql)
+
+  session = cluster.connect(ks)
   session.execute("""
   CREATE TABLE users (
   firstname text,
