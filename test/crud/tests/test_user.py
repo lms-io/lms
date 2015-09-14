@@ -18,8 +18,8 @@ def test_insert():
   for name in os.listdir("cassandra"):
     if name.endswith(".cql"):
       with open("cassandra/" + name) as f:
-          out = f.read()
-          session.execute(out)
+        out = f.read()
+        session.execute(out)
 
   ins = "INSERT INTO user (username, password) VALUES ('%s', '%s');"
   session.execute(ins % ('joe', bcrypt.hashpw('bcrypt', bcrypt.gensalt())))

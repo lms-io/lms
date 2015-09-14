@@ -4,7 +4,7 @@ import random, os, uuid, jsonpickle
 ks = ''.join(random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(16))
 
 def to_json(arg):
-    return jsonpickle.encode(arg,unpicklable=False) 
+  return jsonpickle.encode(arg,unpicklable=False) 
 
 def test_insert():
   cluster = Cluster()
@@ -21,8 +21,8 @@ def test_insert():
   for name in os.listdir("cassandra"):
     if name.endswith(".cql"):
       with open("cassandra/" + name) as f:
-          out = f.read()
-          session.execute(out)
+        out = f.read()
+        session.execute(out)
 
   insert = "insert into interaction (id, url) values (%s, '%s')"
   session.execute(insert % (str(uuid.uuid1()), "http://google.com/?q=abc"))
@@ -32,7 +32,7 @@ def test_insert():
   rows = session.execute('SELECT id, url FROM interaction')
   d = []
   for r in rows:
-      d.insert(0,str(r.id))
+    d.insert(0,str(r.id))
 
   insert = "insert into campaign (id, type, interactions) values (%s,'blah',%s)"
   # need to make this work in a way that isn't ridiculous

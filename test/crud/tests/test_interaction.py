@@ -18,8 +18,8 @@ def test_insert():
   for name in os.listdir("cassandra"):
     if name.endswith(".cql"):
       with open("cassandra/" + name) as f:
-          out = f.read()
-          session.execute(out)
+        out = f.read()
+        session.execute(out)
 
   insert = "insert into interaction (id, url) values (%s, '%s')"
   session.execute(insert % (str(uuid.uuid1()), "http://google.com/?q=abc"))
@@ -29,7 +29,8 @@ def test_insert():
   rows = session.execute('SELECT id, url FROM interaction')
   d = [] 
   for r in rows:
-      d.insert(0,{'id':r.id,'url':r.url})
+    d.insert(0,{'id':r.id,'url':r.url})
+
   print d
 
 
