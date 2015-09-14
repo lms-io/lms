@@ -1,6 +1,7 @@
 CREATE TABLE user (
+organization timeuuid,
 username text,
 password text,
-PRIMARY KEY (username));
+PRIMARY KEY (organization,username));
 
 

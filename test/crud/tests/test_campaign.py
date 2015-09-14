@@ -17,6 +17,7 @@ def test_insert():
   session.execute(kscql)
 
   session = cluster.connect(ks)
+  organization = uuid.uuid1()
 
   for name in os.listdir("cassandra"):
     if name.endswith(".cql"):
@@ -24,22 +25,22 @@ def test_insert():
         out = f.read()
         session.execute(out)
 
-  insert = "insert into interaction (id, url) values (%s, '%s')"
-  session.execute(insert % (str(uuid.uuid1()), "http://google.com/?q=abc"))
-  session.execute(insert % (str(uuid.uuid1()), "http://google.com/?q=def"))
-  session.execute(insert % (str(uuid.uuid1()), "http://google.com/?q=ghi"))
+  insert = "insert into interaction (organization, id, url) values (%s, %s, %s)"
+  session.execute(insert, (organization, uuid.uuid1(), "http://google.com/?q=abc1"))
+  session.execute(insert, (organization, uuid.uuid1(), "http://google.com/?q=abc2"))
+  session.execute(insert, (organization, uuid.uuid1(), "http://google.com/?q=abc3"))
 
-  rows = session.execute('SELECT id, url FROM interaction')
+  rows = session.execute('SELECT organization, id, url FROM interaction')
   d = []
   for r in rows:
     d.insert(0,str(r.id))
 
-  insert = "insert into campaign (id, type, interactions) values (%s,'blah',%s)"
+  insert = "insert into campaign (organization, id, type, interactions) values (%s,%s,%s,%s)"
   # need to make this work in a way that isn't ridiculous
-  lst = to_json(d).replace('[','{').replace(']','}').replace('"', "'")
-  qry = insert % (str(uuid.uuid1()), lst) 
-  print qry 
-  session.execute(qry)
+  # lst = to_json(d).replace('[','{').replace(']','}').replace('"', "'")
+  # qry = insert % (str(uuid.uuid1()), lst) 
+  # print qry 
+  session.execute(insert, (organization, uuid.uuid1(), 'type', set(d)))
 
   rows = session.execute('SELECT id, type, interactions FROM campaign')
   d = []

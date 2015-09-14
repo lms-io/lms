@@ -1,5 +1,5 @@
 from cassandra.cluster import Cluster
-import random, os, bcrypt
+import random, os, uuid, bcrypt
 
 ks = ''.join(random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(16))
 
@@ -14,6 +14,7 @@ def test_insert():
   session.execute(kscql)
 
   session = cluster.connect(ks)
+  organization = uuid.uuid1()
 
   for name in os.listdir("cassandra"):
     if name.endswith(".cql"):
@@ -21,10 +22,10 @@ def test_insert():
         out = f.read()
         session.execute(out)
 
-  ins = "INSERT INTO user (username, password) VALUES ('%s', '%s');"
-  session.execute(ins % ('joe', bcrypt.hashpw('bcrypt', bcrypt.gensalt())))
-  session.execute(ins % ('larry', bcrypt.hashpw('bcrypt', bcrypt.gensalt())))
-  session.execute(ins % ('moe', bcrypt.hashpw('bcrypt', bcrypt.gensalt())))
+  ins = "INSERT INTO user (organization, username, password) VALUES (%s,%s,%s);"
+  session.execute(ins, (organization, 'joe', bcrypt.hashpw('bcrypt', bcrypt.gensalt())))
+  session.execute(ins, (organization, 'larry', bcrypt.hashpw('bcrypt', bcrypt.gensalt())))
+  session.execute(ins, (organization, 'moe', bcrypt.hashpw('bcrypt', bcrypt.gensalt())))
 
   rows = session.execute('SELECT username, password FROM user')
   d = [] 

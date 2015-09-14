@@ -14,6 +14,7 @@ def test_insert():
   session.execute(kscql)
 
   session = cluster.connect(ks)
+  organization = uuid.uuid1()
 
   for name in os.listdir("cassandra"):
     if name.endswith(".cql"):
@@ -21,12 +22,12 @@ def test_insert():
         out = f.read()
         session.execute(out)
 
-  insert = "insert into interaction (id, url) values (%s, '%s')"
-  session.execute(insert % (str(uuid.uuid1()), "http://google.com/?q=abc"))
-  session.execute(insert % (str(uuid.uuid1()), "http://google.com/?q=def"))
-  session.execute(insert % (str(uuid.uuid1()), "http://google.com/?q=ghi"))
+  insert = "insert into interaction (organization, id, url) values (%s, %s, %s)"
+  session.execute(insert, (organization, uuid.uuid1(), "http://google.com/?q=abc"))
+  session.execute(insert, (organization, uuid.uuid1(), "http://google.com/?q=def"))
+  session.execute(insert, (organization, uuid.uuid1(), "http://google.com/?q=ghi"))
 
-  rows = session.execute('SELECT id, url FROM interaction')
+  rows = session.execute('SELECT organization, id, url FROM interaction')
   d = [] 
   for r in rows:
     d.insert(0,{'id':r.id,'url':r.url})
