@@ -41,4 +41,10 @@ def test_insert():
   print qry 
   session.execute(qry)
 
+  rows = session.execute('SELECT id, type, interactions FROM campaign')
+  d = []
+  for r in rows:
+    d.insert(0,{'id':r.id,'type':r.type,'interactions':r.interactions})
+    assert len(r.interactions) == 3
+  print d 
 
