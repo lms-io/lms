@@ -36,10 +36,6 @@ def test_insert():
     d.insert(0,str(r.id))
 
   insert = "insert into campaign (organization, id, type, interactions) values (%s,%s,%s,%s)"
-  # need to make this work in a way that isn't ridiculous
-  # lst = to_json(d).replace('[','{').replace(']','}').replace('"', "'")
-  # qry = insert % (str(uuid.uuid1()), lst) 
-  # print qry 
   session.execute(insert, (organization, uuid.uuid1(), 'type', set(d)))
 
   rows = session.execute('SELECT id, type, interactions FROM campaign')
