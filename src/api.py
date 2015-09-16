@@ -7,7 +7,7 @@ config = configparser.ConfigParser()
 config.read('config.ini')
 
 cluster = Cluster()
-session = cluster.connect('demo')
+session = cluster.connect('lms')
 
 def from_json(arg):
   return jsonpickle.decode(arg)
@@ -17,9 +17,9 @@ def to_json(arg):
 
 @route('/sys')
 def sys_hello():
-  rows = session.execute('SELECT lastname, firstname, age FROM users')
+  rows = session.execute('SELECT organization, username FROM user')
   d = [] 
   for r in rows:
-    d.insert(0,{'lastname':r.lastname,'firstname':r.firstname,'age':r.age})
+    d.insert(0,{'organization':r.organization,'username':r.username})
   return to_json(d) 
 

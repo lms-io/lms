@@ -35,5 +35,5 @@ class StripPathMiddleware(object):
 
 app = bottle.app()
 app.install(EnableCors())
-run(app=StripPathMiddleware(app),host=bhost, port=bport, debug=bdebug, server='cherrypy')
+#run(app=StripPathMiddleware(app),host=bhost, port=bport, debug=bdebug, server='cherrypy')
 

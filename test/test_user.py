@@ -1,9 +1,13 @@
+import random, os, uuid, bcrypt, sys, inspect
+
 from cassandra.cluster import Cluster
-import random, os, uuid, bcrypt
+from webtest import TestApp
 
 ks = ''.join(random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(16))
+ks = 'lms'
 
 def test_insert():
+
   cluster = Cluster()
   session = cluster.connect()
   kscql = """
@@ -22,11 +26,20 @@ def test_insert():
         out = f.read()
         session.execute(out)
 
+  currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+  parentdir = os.path.dirname(currentdir)
+  sys.path.insert(0,parentdir) 
+  import main 
+  app = TestApp(main.app)
+  print app.get('/sys') 
+
   ins = "INSERT INTO user (organization, username, password) VALUES (%s,%s,%s);"
   session.execute(ins, (organization, 'joe', bcrypt.hashpw('bcrypt', bcrypt.gensalt())))
   session.execute(ins, (organization, 'larry', bcrypt.hashpw('bcrypt', bcrypt.gensalt())))
   session.execute(ins, (organization, 'moe', bcrypt.hashpw('bcrypt', bcrypt.gensalt())))
 
+  print app.get('/sys') 
+  assert False
   rows = session.execute('SELECT username, password FROM user')
   d = [] 
   for r in rows:
