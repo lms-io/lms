@@ -7,10 +7,9 @@ ks = ''.join(random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(16))
 
 def test_insert():
   session = setup.keyspace(ks)
-  organization = uuid.uuid1()
+  app = setup.app(ks) 
 
-  import main
-  app = TestApp(main.init(ks))
+  organization = uuid.uuid1()
   print app.get('/sys') 
 
   ins = "INSERT INTO user (organization, username, password) VALUES (%s,%s,%s);"
