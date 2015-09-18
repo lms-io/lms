@@ -1,10 +1,12 @@
 from ccmlib.cluster import Cluster
-import pytest, os, inspect, sys
+import pytest, os, inspect, sys, random
 
 @pytest.fixture(scope="session", autouse=True)
 def ccm_startup(request):
+
+  ks = ''.join(random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(16))
   CLUSTER_PATH="."
-  cluster = Cluster(CLUSTER_PATH, 'hello-world-test', cassandra_version='2.2.1')
+  cluster = Cluster(CLUSTER_PATH, ks, cassandra_version='2.2.1')
   cluster.populate(1).start()
   [node1] = cluster.nodelist()
 

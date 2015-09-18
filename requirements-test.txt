@@ -1,3 +1,4 @@
 ccm==2.0.4.1
 pytest
+pytest-xdist
 webtest
