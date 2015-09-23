@@ -31,8 +31,13 @@ def to_json(arg):
 
 @route('/version')
 def sys_version():
-  redis().set('version','0.1.0')
-  return callback(request,{'version':redis().get('version')}) 
+  try:
+    redis().set('version','0.1.0')
+    return callback(request,{'version':redis().get('version')}) 
+  except Exception, e:
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+    lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+    return callback(request,{'status':'EXCEPTION', 'message':lines})
 
 @route('/auth/status/<key>')
 def auth_status(key=""):
@@ -86,11 +91,4 @@ def auth_logout(key=""):
     return callback(request,{'status':'EXCEPTION', 'message':lines})
 
 
-@route('/sys')
-def sys_hello():
-  rows = db().execute('SELECT organization, username FROM user')
-  d = [] 
-  for r in rows:
-    d.insert(0,{'organization':r.organization,'username':r.username})
-  return to_json(d) 
 
