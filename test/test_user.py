@@ -26,7 +26,7 @@ def test_login():
   organization = uuid.uuid1()
   ins = "INSERT INTO user (organization, username, password) VALUES (%s,%s,%s);"
   session.execute(ins, (organization, 'joe', bcrypt.hashpw('password', bcrypt.gensalt())))
-  res = app.get('/auth/status/blah') 
+  res = app.get('/blah/auth/status') 
   assert res.json.get('status') == 'ERROR'
 
   res = app.post('/auth/login', {'username':'joe','password':'wrongpass','organization':organization}) 
@@ -40,19 +40,19 @@ def test_login():
   key = res.json.get('session')
   assert key != None 
 
-  res = app.get('/auth/status/%s' % (key,) ) 
+  res = app.get('/%s/auth/status' % (key,) ) 
   assert res.json.get('status') == 'OK' 
   assert res.json.get('user') == 'joe' 
 
-  res = app.get('/auth/logout/idontexist') 
+  res = app.get('/idontexist/auth/logout') 
   assert res.json.get('status') == 'ERROR' 
 
-  res = app.get('/auth/logout/%s' % (key,) ) 
+  res = app.get('/%s/auth/logout' % (key,) ) 
   assert res.json.get('status') == 'OK' 
 
-  res = app.get('/auth/logout/%s' % (key,) ) 
+  res = app.get('/%s/auth/logout' % (key,) ) 
   assert res.json.get('status') == 'ERROR' 
 
-  res = app.get('/auth/status/%s' % (key,) ) 
+  res = app.get('/%s/auth/status' % (key,) ) 
   assert res.json.get('status') == 'ERROR' 
 

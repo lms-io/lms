@@ -39,21 +39,6 @@ def sys_version():
     lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
     return callback(request,{'status':'EXCEPTION', 'message':lines})
 
-@route('/auth/status/<key>')
-def auth_status(key=""):
-  try:
-    session = redis().get(key)
-    if session == None:
-      return callback(request,{'status':'ERROR'})
-
-    redis().setex(key,2700,session)
-    return callback(request,{'status':'OK','user':session})
-  except Exception, e:
-    exc_type, exc_value, exc_traceback = sys.exc_info()
-    lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
-    return callback(request,{'status':'EXCEPTION', 'message':lines})
-
-
 @route('/auth/login', method='POST')
 def auth_login():
   try:
@@ -76,7 +61,21 @@ def auth_login():
     lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
     return callback(request,{'status':'EXCEPTION', 'message':lines})
 
-@route('/auth/logout/<key>')
+@route('/<key>/auth/status')
+def auth_status(key=""):
+  try:
+    session = redis().get(key)
+    if session == None:
+      return callback(request,{'status':'ERROR'})
+
+    redis().setex(key,2700,session)
+    return callback(request,{'status':'OK','user':session})
+  except Exception, e:
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+    lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+    return callback(request,{'status':'EXCEPTION', 'message':lines})
+
+@route('/<key>/auth/logout')
 def auth_logout(key=""):
   try:
     session = redis().get(key)
@@ -85,6 +84,20 @@ def auth_logout(key=""):
 
     session = redis().delete(key)
     return callback(request,{'status':'OK'})
+  except Exception, e:
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+    lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+    return callback(request,{'status':'EXCEPTION', 'message':lines})
+
+@route('/<key>/users')
+def auth_status(key=""):
+  try:
+    session = redis().get(key)
+    if session == None:
+      return callback(request,{'status':'ERROR'})
+
+    redis().setex(key,2700,session)
+    return callback(request,{'status':'OK','user':session})
   except Exception, e:
     exc_type, exc_value, exc_traceback = sys.exc_info()
     lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
