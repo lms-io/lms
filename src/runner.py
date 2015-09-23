@@ -1,6 +1,6 @@
 from bottle import route, run, response
 from time import sleep
-import configparser, thread, requests, sys, bottle, main
+import configparser, thread, requests, sys, bottle, main, redis
 
 config = configparser.ConfigParser()
 config.read('config.ini')
