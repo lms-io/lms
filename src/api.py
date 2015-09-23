@@ -64,7 +64,7 @@ def auth_login():
     if match:
       key = "%s:%s" % (organization, uuid.uuid1())
       redis().setex(key,2700,username)
-      return callback(request,{'status':'SUCCESSFUL', 'session':key})
+      return callback(request,{'status':'OK', 'session':key})
     return callback(request,{'status':'ERROR'})
   except Exception, e:
     exc_type, exc_value, exc_traceback = sys.exc_info()

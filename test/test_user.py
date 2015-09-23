@@ -36,7 +36,7 @@ def test_login():
 
   res = app.post('/auth/login', {'username':'joe','password':'password','organization':organization}) 
   print res.json.get('message')
-  assert res.json.get('status') == 'SUCCESSFUL'
+  assert res.json.get('status') == 'OK'
   key = res.json.get('session')
   assert key != None 
 
