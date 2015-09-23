@@ -26,14 +26,20 @@ def test_login():
   organization = uuid.uuid1()
   ins = "INSERT INTO user (organization, username, password) VALUES (%s,%s,%s);"
   session.execute(ins, (organization, 'joe', bcrypt.hashpw('password', bcrypt.gensalt())))
-  res = app.get('/auth/status') 
-  assert res.json.get('status') == ''
+  res = app.get('/auth/status/blah') 
+  assert res.json.get('status') == 'ERROR'
 
   res = app.post('/auth/login', {'username':'joe','password':'wrongpass','organization':organization}) 
   print res.json.get('message')
   assert res.json.get('status') == 'ERROR'
+  assert res.json.get('session') == None 
 
   res = app.post('/auth/login', {'username':'joe','password':'password','organization':organization}) 
   print res.json.get('message')
   assert res.json.get('status') == 'SUCCESSFUL'
-  assert res.json.get('key') == False
+  key = res.json.get('session')
+  assert key != None 
+
+  res = app.get('/auth/status/%s' % (key,) ) 
+  assert res.json.get('status') == 'OK' 
+  assert res.json.get('user') == 'joe' 
