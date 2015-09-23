@@ -1,10 +1,11 @@
-import os, sys, inspect 
+import os, sys, inspect, fakeredis 
 from cassandra.cluster import Cluster
 from webtest import TestApp
 
 def app(ks):
   from src import main
-  app = TestApp(main.init(ks))
+  r = fakeredis.FakeStrictRedis()
+  app = TestApp(main.init(ks,r))
   return app
 
 def keyspace(ks):

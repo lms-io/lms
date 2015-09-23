@@ -8,6 +8,10 @@ bhost = config.get('bottle','host')
 bport = config.getint('bottle','port')
 bdebug = config.getboolean('bottle','debug')
 
+rhost = config.get('redis','host')
+rport = config.getint('redis','port')
+rdb = config.getint('redis','db')
+
 class EnableCors(object):
   name = 'enable_cors'
   def apply(self, fn, context):
@@ -30,7 +34,8 @@ class StripPathMiddleware(object):
     e['PATH_INFO'] = e['PATH_INFO'].rstrip('/')
     return self.app(e,h)
 
-app = main.init('lms')
+rdis = redis.StrictRedis(host=rhost, port=rport, db=rdb)
+app = main.init('lms',rdis)
 app.install(EnableCors())
 run(app=StripPathMiddleware(app),host=bhost, port=bport, debug=bdebug, server='cherrypy')
 

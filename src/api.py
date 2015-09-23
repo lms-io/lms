@@ -5,11 +5,11 @@ import uuid, traceback, redis, thread, bcrypt, configparser, requests, sys, json
 
 config = configparser.ConfigParser()
 config.read('config.ini')
-rhost = config.get('redis','host')
-rport = config.getint('redis','port')
-rdb = config.getint('redis','db')
-rdis = redis.StrictRedis(host=rhost, port=rport, db=rdb)
+
+
 syskey = config.get('application','syskey')
+
+rdis = None 
 
 keyspace = 'lms'
 def session():
