@@ -43,3 +43,12 @@ def test_login():
   res = app.get('/auth/status/%s' % (key,) ) 
   assert res.json.get('status') == 'OK' 
   assert res.json.get('user') == 'joe' 
+
+  res = app.get('/auth/logout/idontexist') 
+  assert res.json.get('status') == 'ERROR' 
+
+  res = app.get('/auth/logout/%s' % (key,) ) 
+  assert res.json.get('status') == 'OK' 
+
+  res = app.get('/auth/logout/%s' % (key,) ) 
+  assert res.json.get('status') == 'ERROR' 
