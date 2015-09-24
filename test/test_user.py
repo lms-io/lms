@@ -27,6 +27,7 @@ def test_login():
   ins = "INSERT INTO user (organization, username, password) VALUES (%s,%s,%s);"
   session.execute(ins, (organization, 'joe', bcrypt.hashpw('password', bcrypt.gensalt())))
   res = app.get('/blah/auth/status') 
+  print res.json.get('message')
   assert res.json.get('status') == 'ERROR'
 
   res = app.post('/auth/login', {'username':'joe','password':'wrongpass','organization':organization}) 
@@ -41,6 +42,7 @@ def test_login():
   assert key != None 
 
   res = app.get('/%s/auth/status' % (key,) ) 
+  print res.json.get('message')
   assert res.json.get('status') == 'OK' 
   assert res.json.get('user') == 'joe' 
 
@@ -48,11 +50,31 @@ def test_login():
   assert res.json.get('status') == 'ERROR' 
 
   res = app.get('/%s/auth/logout' % (key,) ) 
+  print res.json.get('message')
   assert res.json.get('status') == 'OK' 
 
   res = app.get('/%s/auth/logout' % (key,) ) 
   assert res.json.get('status') == 'ERROR' 
 
   res = app.get('/%s/auth/status' % (key,) ) 
+  assert res.json.get('status') == 'ERROR' 
+
+def test_get_all_users():
+  ks = ''.join(random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(16))
+  session = setup.keyspace(ks)
+  app = setup.app(ks) 
+  organization = uuid.uuid1()
+  ins = "INSERT INTO user (organization, username, password) VALUES (%s,%s,%s);"
+  session.execute(ins, (organization, 'joe', bcrypt.hashpw('password', bcrypt.gensalt())))
+
+  res = app.post('/auth/login', {'username':'joe','password':'password','organization':organization}) 
+  print res.json.get('message')
+  assert res.json.get('status') == 'OK'
+  key = res.json.get('session')
+  assert key != None 
+
+  res = app.get('/%s/users' % (key,) ) 
+  print res.json.get('message')
+  print res.json.get('res')
   assert res.json.get('status') == 'ERROR' 
 

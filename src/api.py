@@ -1,7 +1,7 @@
 from bottle import route,request 
 from cassandra.cluster import Cluster
 
-import uuid, traceback, redis, thread, bcrypt, configparser, requests, sys, jsonpickle, random, os, zipfile, shutil 
+import uuid, collections, traceback, redis, thread, bcrypt, configparser, requests, sys, jsonpickle, random, os, zipfile, shutil 
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -28,6 +28,16 @@ def from_json(arg):
 
 def to_json(arg):
   return jsonpickle.encode(arg,unpicklable=False) 
+
+def session(key):
+  user = redis().get(key)
+  if user == None:
+    return None
+  redis().setex(key,2700,user)
+  organization = uuid.UUID(key.split(":")[0])
+  #return key,user,organization
+  return {'key':key,'user':user,'organization':organization}
+
 
 @route('/version')
 def sys_version():
@@ -64,12 +74,11 @@ def auth_login():
 @route('/<key>/auth/status')
 def auth_status(key=""):
   try:
-    session = redis().get(key)
-    if session == None:
+    s = session(key) 
+    if s == None:
       return callback(request,{'status':'ERROR'})
 
-    redis().setex(key,2700,session)
-    return callback(request,{'status':'OK','user':session})
+    return callback(request,{'status':'OK','user': s.get('user')})
   except Exception, e:
     exc_type, exc_value, exc_traceback = sys.exc_info()
     lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
@@ -92,12 +101,19 @@ def auth_logout(key=""):
 @route('/<key>/users')
 def auth_status(key=""):
   try:
-    session = redis().get(key)
-    if session == None:
+    s = session(key) 
+    if s == None:
       return callback(request,{'status':'ERROR'})
 
-    redis().setex(key,2700,session)
-    return callback(request,{'status':'OK','user':session})
+    user = s.get('user')
+    organization = s.get('organization')
+
+    rows = db().execute('SELECT username,organization from user where organization=%s', (organization,))
+    d = []
+    for r in rows:
+      d.insert(0,{'username':r.username,'organization':str(r.organization)})
+      
+    return callback(request,{'status':'OK', 'res':d})
   except Exception, e:
     exc_type, exc_value, exc_traceback = sys.exc_info()
     lines = traceback.format_exception(exc_type, exc_value, exc_traceback)

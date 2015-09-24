@@ -36,6 +36,12 @@ def main():
 
   ins = "INSERT INTO user (organization, username, password) VALUES (%s,%s,%s);"
   session.execute(ins, (organization, 'admin', bcrypt.hashpw('password', bcrypt.gensalt())))
-  print "data loaded, use username <admin> password <password>"
+
+  print 'adding users'
+  for x in range(0, 50):
+    print x
+    session.execute(ins, (organization, 'admin%s' % (x,), bcrypt.hashpw('password', bcrypt.gensalt())))
+
+  print "data loaded, use username <admin> password <password> organization %s" % (organization,)
 
 
