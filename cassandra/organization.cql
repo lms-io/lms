@@ -1,5 +1,4 @@
 CREATE TABLE organization (
-id timeuuid,
-PRIMARY KEY (id));
-
-
+  uid timeuuid primary key,
+  name text
+);

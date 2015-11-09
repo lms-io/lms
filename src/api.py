@@ -59,8 +59,8 @@ def auth_login():
     if username is None or password is None:
       return callback(request,{'status':'INVALID'})
 
-    usr = db().execute('SELECT username, password from user where username=%s and organization=%s', (username,organization))[0]
-    match = usr.password == bcrypt.hashpw(password.encode('utf-8'), usr.password.encode('utf-8'))
+    usr = db().execute('SELECT username, password, organization_uid from user where username=%s', (username,))[0]
+    match = usr.password == bcrypt.hashpw(password.encode('utf-8'), usr.password.encode('utf-8')) and usr.organization_uid == organization
     if match:
       key = "%s:%s" % (organization, uuid.uuid1())
       redis().setex(key,2700,username)
@@ -108,7 +108,7 @@ def auth_status(key=""):
     user = s.get('user')
     organization = s.get('organization')
 
-    rows = db().execute('SELECT username,organization from user where organization=%s', (organization,))
+    rows = db().execute('SELECT username,organization_uid from user where organization_uid=%s', (organization,))
     d = []
     for r in rows:
       d.insert(0,{'username':r.username,'organization':str(r.organization)})
