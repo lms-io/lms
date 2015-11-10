@@ -1,21 +1,18 @@
 from bottle import route,request 
 from cassandra.cluster import Cluster
 
-import uuid, collections, traceback, redis, thread, bcrypt, configparser, requests, sys, jsonpickle, random, os, zipfile, shutil 
+import uuid, collections, traceback, redis, thread, bcrypt, configparser, requests, sys, jsonpickle, random, os, zipfile, shutil, appcontext 
 
 config = configparser.ConfigParser()
 config.read('config.ini')
 
+def redis():
+  return appcontext.redis()
+
+def db():
+  return appcontext.db()
 
 syskey = config.get('application','syskey')
-
-rdis = None 
-def redis():
-  return rdis 
-
-keyspace = 'lms'
-def db():
-  return Cluster().connect(keyspace)
 
 def callback(r, v):
     if r.query.get('callback') is not None:
