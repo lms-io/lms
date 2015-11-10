@@ -34,9 +34,9 @@ def session(key):
   if user == None:
     return None
   redis().setex(key,2700,user)
-  organization = uuid.UUID(key.split(":")[0])
-  #return key,user,organization
-  return {'key':key,'user':user,'organization':organization}
+  organization_uid = uuid.UUID(key.split(":")[0])
+  #return key,user,organization_uid
+  return {'key':key,'user':user,'organization_uid':organization_uid}
 
 
 @route('/version')
@@ -54,15 +54,15 @@ def auth_login():
   try:
     username = request.forms.get('username') 
     password = request.forms.get('password') 
-    organization = uuid.UUID(request.forms.get('organization')) 
+    organization_uid = uuid.UUID(request.forms.get('organization_uid')) 
 
     if username is None or password is None:
       return callback(request,{'status':'INVALID'})
 
     usr = db().execute('SELECT username, password, organization_uid from user where username=%s', (username,))[0]
-    match = usr.password == bcrypt.hashpw(password.encode('utf-8'), usr.password.encode('utf-8')) and usr.organization_uid == organization
+    match = usr.password == bcrypt.hashpw(password.encode('utf-8'), usr.password.encode('utf-8')) and usr.organization_uid == organization_uid
     if match:
-      key = "%s:%s" % (organization, uuid.uuid1())
+      key = "%s:%s" % (organization_uid, uuid.uuid1())
       redis().setex(key,2700,username)
       return callback(request,{'status':'OK', 'session':key})
     return callback(request,{'status':'ERROR'})
@@ -106,12 +106,12 @@ def auth_status(key=""):
       return callback(request,{'status':'ERROR'})
 
     user = s.get('user')
-    organization = s.get('organization')
+    organization_uid = s.get('organization_uid')
 
-    rows = db().execute('SELECT username,organization_uid from user where organization_uid=%s', (organization,))
+    rows = db().execute('SELECT user_username,organization_uid from user_by_organization where organization_uid=%s', (organization_uid,))
     d = []
     for r in rows:
-      d.insert(0,{'username':r.username,'organization':str(r.organization)})
+      d.insert(0,{'username':r.user_username,'organization_uid':str(r.organization_uid)})
       
     return callback(request,{'status':'OK', 'res':d})
   except Exception, e:

@@ -8,11 +8,11 @@ def test_insert():
   ks = ''.join(random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(16))
   session = setup.keyspace(ks)
   app = setup.app(ks) 
-  organization = uuid.uuid1()
+  organization_uid = uuid.uuid1()
   ins = "INSERT INTO user (organization_uid, username, password) VALUES (%s,%s,%s);"
-  session.execute(ins, (organization, 'joe', bcrypt.hashpw('bcrypt', bcrypt.gensalt())))
-  session.execute(ins, (organization, 'larry', bcrypt.hashpw('bcrypt', bcrypt.gensalt())))
-  session.execute(ins, (organization, 'moe', bcrypt.hashpw('bcrypt', bcrypt.gensalt())))
+  session.execute(ins, (organization_uid, 'joe', bcrypt.hashpw('bcrypt', bcrypt.gensalt())))
+  session.execute(ins, (organization_uid, 'larry', bcrypt.hashpw('bcrypt', bcrypt.gensalt())))
+  session.execute(ins, (organization_uid, 'moe', bcrypt.hashpw('bcrypt', bcrypt.gensalt())))
   rows = session.execute('SELECT username, password FROM user')
   d = [] 
   for r in rows:
@@ -23,19 +23,19 @@ def test_login():
   ks = ''.join(random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(16))
   session = setup.keyspace(ks)
   app = setup.app(ks) 
-  organization = uuid.uuid1()
+  organization_uid = uuid.uuid1()
   ins = "INSERT INTO user (organization_uid, username, password) VALUES (%s,%s,%s);"
-  session.execute(ins, (organization, 'joe', bcrypt.hashpw('password', bcrypt.gensalt())))
+  session.execute(ins, (organization_uid, 'joe', bcrypt.hashpw('password', bcrypt.gensalt())))
   res = app.get('/blah/auth/status') 
   print res.json.get('message')
   assert res.json.get('status') == 'ERROR'
 
-  res = app.post('/auth/login', {'username':'joe','password':'wrongpass','organization':organization}) 
+  res = app.post('/auth/login', {'username':'joe','password':'wrongpass','organization_uid':organization_uid}) 
   print res.json.get('message')
   assert res.json.get('status') == 'ERROR'
   assert res.json.get('session') == None 
 
-  res = app.post('/auth/login', {'username':'joe','password':'password','organization':organization}) 
+  res = app.post('/auth/login', {'username':'joe','password':'password','organization_uid':organization_uid}) 
   print res.json.get('message')
   assert res.json.get('status') == 'OK'
   key = res.json.get('session')
@@ -63,11 +63,11 @@ def test_get_all_users():
   ks = ''.join(random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(16))
   session = setup.keyspace(ks)
   app = setup.app(ks) 
-  organization = uuid.uuid1()
+  organization_uid = uuid.uuid1()
   ins = "INSERT INTO user (organization_uid, username, password) VALUES (%s,%s,%s);"
-  session.execute(ins, (organization, 'joe', bcrypt.hashpw('password', bcrypt.gensalt())))
+  session.execute(ins, (organization_uid, 'joe', bcrypt.hashpw('password', bcrypt.gensalt())))
 
-  res = app.post('/auth/login', {'username':'joe','password':'password','organization':organization}) 
+  res = app.post('/auth/login', {'username':'joe','password':'password','organization_uid':organization_uid}) 
   print res.json.get('message')
   assert res.json.get('status') == 'OK'
   key = res.json.get('session')
