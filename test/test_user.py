@@ -1,8 +1,12 @@
-import random, os, uuid, bcrypt, sys, inspect, setup
+import random, os, uuid, bcrypt, sys, inspect, setup, configparser
 
 from cassandra.cluster import Cluster
 from webtest import TestApp
 
+config = configparser.ConfigParser()
+config.read('config.ini')
+
+syskey = config.get('application','syskey')
 
 def test_insert():
   ks = ''.join(random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(16))
@@ -23,7 +27,9 @@ def test_login():
   ks = ''.join(random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(16))
   session = setup.keyspace(ks)
   app = setup.app(ks) 
-  organization_uid = uuid.uuid1()
+  res = app.post('/%s/organization' % (syskey,), {'name':'testcorp'})
+  organization_uid = uuid.UUID(res.json.get('uid'))
+
   ins = "INSERT INTO user (organization_uid, username, password) VALUES (%s,%s,%s);"
   session.execute(ins, (organization_uid, 'joe', bcrypt.hashpw('password', bcrypt.gensalt())))
   res = app.get('/blah/auth/status') 

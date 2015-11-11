@@ -1,7 +1,9 @@
 from bottle import route,request 
 from cassandra.cluster import Cluster
 
-import uuid, collections, traceback, redis, thread, bcrypt, configparser, requests, sys, jsonpickle, random, os, zipfile, shutil, appcontext 
+import uuid, collections, traceback, redis, thread, bcrypt, configparser, requests, sys, jsonpickle, random, os, zipfile, shutil
+
+import appcontext, organizationdao 
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -13,6 +15,8 @@ def db():
   return appcontext.db()
 
 syskey = config.get('application','syskey')
+def is_sys(key):
+  return key == syskey
 
 def callback(r, v):
     if r.query.get('callback') is not None:
@@ -35,6 +39,20 @@ def session(key):
   #return key,user,organization_uid
   return {'key':key,'user':user,'organization_uid':organization_uid}
 
+
+@route('/<key>/organization', method='POST')
+def admn_organization(key=""): 
+  try:
+    if is_sys(key) == False:
+      return callback(res,{'status':'ERROR'})
+
+    name = request.forms.get('name') 
+    res = organizationdao.create(name)
+    return callback(request,{'uid':str(res)})
+  except Exception, e:
+    exc_type, exc_value, exc_traceback = sys.exc_info()
+    lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+    return callback(request,{'status':'EXCEPTION', 'message':lines})
 
 @route('/version')
 def sys_version():
