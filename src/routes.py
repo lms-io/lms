@@ -48,19 +48,12 @@ def auth_login():
 @err
 def auth_status(key=""):
   s = auth.session(key) 
-  if s == None:
-    return callback(request,{'status':'ERROR'})
-
   return callback(request,{'status':'OK','user': s.get('user')})
 
 @route('/<key>/auth/logout')
 @err
 def auth_logout(key=""):
-  session = appcontext.redis().get(key)
-  if session == None:
-    return callback(request,{'status':'ERROR'})
-
-  session = appcontext.redis().delete(key)
+  appcontext.redis().delete(key)
   return callback(request,{'status':'OK'})
 
 @route('/<key>/organization', method='POST')
@@ -76,12 +69,8 @@ def admn_organization(key=""):
 @err
 def auth_status(key=""):
   s = auth.session(key) 
-  if s == None:
-    return callback(request,{'status':'ERROR'})
-
   user = s.get('user')
   organization_uid = s.get('organization_uid')
-
   rows = appcontext.db().execute('SELECT user_username,organization_uid from user_by_organization where organization_uid=%s', (organization_uid,))
   d = []
   for r in rows:

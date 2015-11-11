@@ -34,7 +34,7 @@ def test_login():
   session.execute(ins, (organization_uid, 'joe', bcrypt.hashpw('password', bcrypt.gensalt())))
   res = app.get('/blah/auth/status') 
   print res.json.get('message')
-  assert res.json.get('status') == 'ERROR'
+  assert res.json.get('status') == 'EXCEPTION'
 
   res = app.post('/auth/login', {'username':'joe','password':'wrongpass','organization_uid':organization_uid}) 
   print res.json.get('message')
@@ -53,17 +53,17 @@ def test_login():
   assert res.json.get('user') == 'joe' 
 
   res = app.get('/idontexist/auth/logout') 
-  assert res.json.get('status') == 'ERROR' 
+  assert res.json.get('status') == 'OK' 
 
   res = app.get('/%s/auth/logout' % (key,) ) 
   print res.json.get('message')
   assert res.json.get('status') == 'OK' 
 
   res = app.get('/%s/auth/logout' % (key,) ) 
-  assert res.json.get('status') == 'ERROR' 
+  assert res.json.get('status') == 'OK' 
 
   res = app.get('/%s/auth/status' % (key,) ) 
-  assert res.json.get('status') == 'ERROR' 
+  assert res.json.get('status') == 'EXCEPTION' 
 
 def test_get_all_users():
   ks = ''.join(random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(16))
