@@ -53,14 +53,15 @@ def test_login():
   assert res.json.get('user') == 'joe' 
 
   res = app.get('/idontexist/auth/logout') 
-  assert res.json.get('status') == 'OK' 
+  assert res.json.get('status') == 'EXCEPTION' 
 
+  print key
   res = app.get('/%s/auth/logout' % (key,) ) 
   print res.json.get('message')
   assert res.json.get('status') == 'OK' 
 
   res = app.get('/%s/auth/logout' % (key,) ) 
-  assert res.json.get('status') == 'OK' 
+  assert res.json.get('status') == 'EXCEPTION' 
 
   res = app.get('/%s/auth/status' % (key,) ) 
   assert res.json.get('status') == 'EXCEPTION' 

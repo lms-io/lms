@@ -39,8 +39,7 @@ def auth_login():
   usr = appcontext.db().execute('SELECT username, password, organization_uid from user where username=%s', (username,))[0]
   match = usr.password == bcrypt.hashpw(password.encode('utf-8'), usr.password.encode('utf-8')) and usr.organization_uid == organization_uid
   if match:
-    key = "%s:%s" % (organization_uid, uuid.uuid1())
-    appcontext.redis().setex(key,2700,username)
+    key = auth.createSession(organization_uid,username)
     return callback(request,{'status':'OK', 'session':key})
   return callback(request,{'status':'ERROR'})
   
@@ -53,7 +52,7 @@ def auth_status(key=""):
 @route('/<key>/auth/logout')
 @err
 def auth_logout(key=""):
-  appcontext.redis().delete(key)
+  auth.clearSession(key)
   return callback(request,{'status':'OK'})
 
 @route('/<key>/organization', method='POST')
