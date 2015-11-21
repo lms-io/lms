@@ -1,8 +1,7 @@
 CREATE TABLE campaign (
-organization timeuuid,
-id timeuuid,
+organization_uid text primary key,
+uid text,
 type text,
-interactions set<text>,
-PRIMARY KEY (organization, id));
+interactions set<text>);
 
 

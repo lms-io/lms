@@ -12,7 +12,7 @@ def test_insert():
   ks = ''.join(random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(16))
   session = setup.keyspace(ks)
   app = setup.app(ks) 
-  organization_uid = uuid.uuid1()
+  organization_uid = str(uuid.uuid1())
   ins = "INSERT INTO user (organization_uid, username, password) VALUES (%s,%s,%s);"
   session.execute(ins, (organization_uid, 'joe', bcrypt.hashpw('bcrypt', bcrypt.gensalt())))
   session.execute(ins, (organization_uid, 'larry', bcrypt.hashpw('bcrypt', bcrypt.gensalt())))
@@ -27,11 +27,11 @@ def test_login():
   ks = ''.join(random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(16))
   session = setup.keyspace(ks)
   app = setup.app(ks) 
-  res = app.post('/%s/organization' % (syskey,), {'name':'testcorp'})
-  organization_uid = uuid.UUID(res.json.get('uid'))
+  res = app.post('/%s/organization' % (syskey,), {'name':'testcorp', 'admin_username':'joe', 'admin_password':'password'})
+  print res.json 
+  organization_uid = str(res.json.get('uid'))
 
-  ins = "INSERT INTO user (organization_uid, username, password) VALUES (%s,%s,%s);"
-  session.execute(ins, (organization_uid, 'joe', bcrypt.hashpw('password', bcrypt.gensalt())))
+  print "organization : " + organization_uid
   res = app.get('/blah/auth/status') 
   print res.json.get('message')
   assert res.json.get('status') == 'EXCEPTION'
@@ -70,7 +70,7 @@ def test_get_all_users():
   ks = ''.join(random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(16))
   session = setup.keyspace(ks)
   app = setup.app(ks) 
-  organization_uid = uuid.uuid1()
+  organization_uid = str(uuid.uuid1())
   ins = "INSERT INTO user (organization_uid, username, password) VALUES (%s,%s,%s);"
   session.execute(ins, (organization_uid, 'joe', bcrypt.hashpw('password', bcrypt.gensalt())))
 

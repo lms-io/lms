@@ -1,7 +1,6 @@
 CREATE TABLE interaction (
-organization timeuuid,
-id timeuuid,
-url text,
-PRIMARY KEY (organization, id));
+organization_uid text,
+uid text primary key,
+url text);
 
 

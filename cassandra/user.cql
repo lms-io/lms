@@ -1,5 +1,5 @@
 CREATE TABLE user (
-  organization_uid timeuuid,
+  organization_uid text,
   username text primary key,
   firstName text,
   lastName text,

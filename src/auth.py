@@ -14,7 +14,7 @@ def session(key):
     raise ValueError('User not found')
 
   rdis.setex(key,2700,user)
-  organization_uid = uuid.UUID(key.split(":")[0])
+  organization_uid = key.split(":")[0]
   return {'key':key,'user':user,'organization_uid':organization_uid}
 
 def clearSession(key):
@@ -24,8 +24,8 @@ def clearSession(key):
   user = rdis.get(key)
   if user == None:
     raise ValueError('User not found')
-  organization_uid = uuid.UUID(key.split(":")[0])
-  uid = uuid.UUID(key.split(":")[1])
+  organization_uid = key.split(":")[0]
+  uid = key.split(":")[1]
   #create the session key the same way it is done via create sesion
   key = "%s:%s" % (organization_uid, uid)
   appcontext.redis().delete(key)

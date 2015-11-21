@@ -1,7 +1,7 @@
 from bottle import route,request 
 from cassandra.cluster import Cluster
 
-import uuid, collections, traceback, bcrypt, requests, sys, appcontext, auth, organizationdao 
+import uuid, collections, traceback, bcrypt, requests, sys, appcontext, auth, organization, user 
 
 def callback(r, v):
   if r.query.get('callback') is not None:
@@ -31,7 +31,7 @@ def sys_version():
 def auth_login():
   username = request.forms.get('username') 
   password = request.forms.get('password') 
-  organization_uid = uuid.UUID(request.forms.get('organization_uid')) 
+  organization_uid = request.forms.get('organization_uid') 
 
   if username is None or password is None:
     return callback(request,{'status':'INVALID'})
@@ -57,12 +57,15 @@ def auth_logout(key=""):
 
 @route('/<key>/organization', method='POST')
 @err
-def admn_organization(key=""): 
+def admn_organization(key="" ): 
   if auth.is_sys(key) == False:
     return callback(res,{'status':'ERROR'})
+  admin = request.forms.get('admin_username')
+  adminpass = request.forms.get('admin_password')
   name = request.forms.get('name') 
-  res = organizationdao.create(name)
-  return callback(request,{'uid':str(res)})
+  organization_uid = organization.create(name)
+  user.create(organization_uid, admin, adminpass)
+  return callback(request,{'uid':str(organization_uid)})
 
 @route('/<key>/users')
 @err
