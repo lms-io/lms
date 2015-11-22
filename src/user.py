@@ -11,7 +11,12 @@ def redis():
 def db():
   return appcontext.db()
 
-def create(organization_uid, username, password):
+def exists(organization_uid, username, password):
+  usr = appcontext.db().execute('SELECT username, password, organization_uid from user where username=%s', (username,))[0]
+  match = usr.password == bcrypt.hashpw(password.encode('utf-8'), usr.password.encode('utf-8')) and usr.organization_uid == organization_uid
+  return match
+
+def create(organization_uid, username, password, firstName="", lastName=""):
   ins = "INSERT INTO user (organization_uid, username, password) VALUES (%s,%s,%s);"
   db().execute(ins, (organization_uid, username, bcrypt.hashpw(password, bcrypt.gensalt())))
   ins = "INSERT INTO user_by_organization (organization_uid, user_username) VALUES (%s,%s);"

@@ -36,11 +36,12 @@ def auth_login():
   if username is None or password is None:
     return callback(request,{'status':'INVALID'})
 
-  usr = appcontext.db().execute('SELECT username, password, organization_uid from user where username=%s', (username,))[0]
-  match = usr.password == bcrypt.hashpw(password.encode('utf-8'), usr.password.encode('utf-8')) and usr.organization_uid == organization_uid
+  match = user.exists(organization_uid, username, password)
+
   if match:
     key = auth.createSession(organization_uid,username)
     return callback(request,{'status':'OK', 'session':key})
+
   return callback(request,{'status':'ERROR'})
   
 @route('/<key>/auth/status')
@@ -69,7 +70,7 @@ def admn_organization(key="" ):
 
 @route('/<key>/users')
 @err
-def auth_status(key=""):
+def auth_list_users(key=""):
   s = auth.session(key) 
   user = s.get('user')
   organization_uid = s.get('organization_uid')
@@ -79,5 +80,18 @@ def auth_status(key=""):
     d.insert(0,{'username':r.user_username,'organization_uid':str(r.organization_uid)})
     
   return callback(request,{'status':'OK', 'res':d})
+
+@route('/<key>/user', method='POST')
+@err
+def auth_user_add(key=""):
+  s = auth.session(key) 
+  user = s.get('user')
+  username = request.forms.get('username') 
+  password = request.forms.get('password') 
+  firstName = request.forms.get('firstName') 
+  lastName = request.forms.get('lastName') 
+  organization_uid = s.get('organization_uid')
+  user.create(organization_uid, username, password, firstName, lastName)
+  return callback(request,{'status':'OK'})
 
 
