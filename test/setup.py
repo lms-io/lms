@@ -1,14 +1,25 @@
-import os, sys, inspect, fakeredis 
+import random, os, sys, inspect, fakeredis 
 from cassandra.cluster import Cluster
 from webtest import TestApp
 
-def app(ks):
+sys = {}
+ks = ''.join(random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(16))
+
+def app():
+  if 'app' in sys.keys():
+    return sys['app']
+
   from src import main
   r = fakeredis.FakeStrictRedis()
+  cass = cassandra()
   app = TestApp(main.init(ks,r))
+  sys['app'] = app
   return app
 
-def keyspace(ks):
+def cassandra():
+  if 'session' in sys.keys():
+    return sys['session']
+
   cluster = Cluster()
   session = cluster.connect()
   kscql = """
@@ -24,4 +35,5 @@ def keyspace(ks):
         out = f.read()
         session.execute(out)
 
+  sys['session'] = session
   return session 
