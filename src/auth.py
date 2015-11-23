@@ -7,7 +7,7 @@ syskey = config.get('application','syskey')
 def is_sys(key):
   return key == syskey
 
-def session(key):
+def session(key,access=""):
   rdis = appcontext.redis()
   user = rdis.get(key)
   if user == None:
@@ -35,3 +35,4 @@ def createSession(organization_uid,username):
   key = "%s:%s" % (organization_uid, uuid.uuid1())
   rdis.setex(key,2700,username)
   return key
+

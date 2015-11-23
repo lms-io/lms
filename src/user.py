@@ -23,4 +23,10 @@ def create(organization_uid, username, password, firstName="", lastName=""):
   db().execute(ins, (organization_uid, username)) 
   return ""
 
+def list(organization_uid):
+  rows = appcontext.db().execute('SELECT user_username,organization_uid from user_by_organization where organization_uid=%s', (organization_uid,))
+  d = []
+  for r in rows:
+    d.insert(0,{'username':r.user_username,'organization_uid':str(r.organization_uid)})
+  return d
 

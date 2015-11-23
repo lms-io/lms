@@ -20,12 +20,27 @@ def err(func):
       return {'status':'EXCEPTION', 'message':lines}
   return wrapper
 
+# NON-SESSION 
 @route('/version')
 @err
 def sys_version():
   appcontext.redis().set('version','0.1.0')
   return callback(request,{'version':appcontext.redis().get('version')}) 
 
+# SUPER ADMIN
+@route('/<key>/organization', method='POST')
+@err
+def admn_organization(key="" ): 
+  if auth.is_sys(key) == False:
+    return callback(res,{'status':'ERROR'})
+  admin = request.forms.get('admin_username')
+  adminpass = request.forms.get('admin_password')
+  name = request.forms.get('name') 
+  organization_uid = organization.create(name)
+  user.create(organization_uid, admin, adminpass)
+  return callback(request,{'uid':str(organization_uid)})
+
+# AUTHORIZATION 
 @route('/auth/login', method='POST')
 @err
 def auth_login():
@@ -56,36 +71,19 @@ def auth_logout(key=""):
   auth.clearSession(key)
   return callback(request,{'status':'OK'})
 
-@route('/<key>/organization', method='POST')
-@err
-def admn_organization(key="" ): 
-  if auth.is_sys(key) == False:
-    return callback(res,{'status':'ERROR'})
-  admin = request.forms.get('admin_username')
-  adminpass = request.forms.get('admin_password')
-  name = request.forms.get('name') 
-  organization_uid = organization.create(name)
-  user.create(organization_uid, admin, adminpass)
-  return callback(request,{'uid':str(organization_uid)})
-
+# API 
 @route('/<key>/users')
 @err
 def auth_list_users(key=""):
-  s = auth.session(key) 
-  user = s.get('user')
+  s = auth.session(key,"USER:LIST") 
   organization_uid = s.get('organization_uid')
-  rows = appcontext.db().execute('SELECT user_username,organization_uid from user_by_organization where organization_uid=%s', (organization_uid,))
-  d = []
-  for r in rows:
-    d.insert(0,{'username':r.user_username,'organization_uid':str(r.organization_uid)})
-    
-  return callback(request,{'status':'OK', 'res':d})
+  res = user.list(organization_uid)   
+  return callback(request,{'status':'OK', 'res':res})
 
 @route('/<key>/user', method='POST')
 @err
 def auth_user_add(key=""):
-  s = auth.session(key) 
-  user = s.get('user')
+  s = auth.session(key, "USER:CREATE")
   username = request.forms.get('username') 
   password = request.forms.get('password') 
   firstName = request.forms.get('firstName') 
