@@ -17,6 +17,9 @@ def session(key,access=""):
   organization_uid = key.split(":")[0]
   return {'key':key,'user':user,'organization_uid':organization_uid}
 
+def permission(user, permissions):
+  return True
+
 def clearSession(key):
   rdis = appcontext.redis()
   #checks to see if it matches the syntax of a valid session

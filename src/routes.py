@@ -1,7 +1,7 @@
 from bottle import route,request 
 from cassandra.cluster import Cluster
 
-import uuid, collections, traceback, bcrypt, requests, sys, appcontext, auth, organization, user 
+import uuid, collections, traceback, bcrypt, requests, sys, appcontext, auth, organization, user, permission 
 
 def callback(r, v):
   if r.query.get('callback') is not None:
@@ -38,6 +38,7 @@ def admn_organization(key="" ):
   name = request.forms.get('name') 
   organization_uid = organization.create(name)
   user.create(organization_uid, admin, adminpass)
+  permission.grant(admin, 'ALL')
   return callback(request,{'uid':str(organization_uid)})
 
 # AUTHORIZATION 
@@ -54,6 +55,7 @@ def auth_login():
   match = user.exists(organization_uid, username, password)
 
   if match:
+    auth.permission(username, ['LOGIN'])
     key = auth.createSession(organization_uid,username)
     return callback(request,{'status':'OK', 'session':key})
 
@@ -75,7 +77,9 @@ def auth_logout(key=""):
 @route('/<key>/users')
 @err
 def auth_list_users(key=""):
-  s = auth.session(key,"USER:LIST") 
+  s = auth.session(key)
+  auth.permission(s.get('user'), ['USER','USER:LIST'])
+
   organization_uid = s.get('organization_uid')
   res = user.list(organization_uid)   
   return callback(request,{'status':'OK', 'res':res})
@@ -83,7 +87,23 @@ def auth_list_users(key=""):
 @route('/<key>/user', method='POST')
 @err
 def auth_user_add(key=""):
-  s = auth.session(key, "USER:CREATE")
+  s = auth.session(key)
+  auth.permission(s.get('user'), ['USER','USER:CREATE'])
+
+  username = request.forms.get('username') 
+  password = request.forms.get('password') 
+  firstName = request.forms.get('firstName') 
+  lastName = request.forms.get('lastName') 
+  organization_uid = s.get('organization_uid')
+  user.create(organization_uid, username, password, firstName, lastName)
+  return callback(request,{'status':'OK'})
+
+@route('/<key>/user/<username>', method='POST')
+@err
+def auth_user_update(key="", username=""):
+  s = auth.session(key)
+  auth.permission(s.get('user'), ['USER','USER:UPDATE', 'USER:UPDATE:'+username])
+
   username = request.forms.get('username') 
   password = request.forms.get('password') 
   firstName = request.forms.get('firstName') 
