@@ -1,6 +1,6 @@
 from bottle import route,request 
 from cassandra.cluster import Cluster
-import uuid, collections, traceback, redis, thread, bcrypt, configparser, requests, sys, jsonpickle, random, os, zipfile, shutil, appcontext 
+import uuid, collections, traceback, redis, thread, bcrypt, configparser, requests, sys, jsonpickle, random, os, zipfile, shutil, appcontext, permission 
 
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -21,6 +21,20 @@ def create(organization_uid, username, password, firstName="", lastName=""):
   db().execute(ins, (organization_uid, username, bcrypt.hashpw(password, bcrypt.gensalt())))
   ins = "INSERT INTO user_by_organization (organization_uid, user_username) VALUES (%s,%s);"
   db().execute(ins, (organization_uid, username)) 
+  permission.grant(username, 'USER:UPDATE:'+username)
+  permission.grant(username, 'LOGIN')
+  return ""
+
+def delete(organization_uid, username):
+  ins = "delete from user where username = %s;"
+  db().execute(ins, (username,))
+  ins = "delete from user_by_organization where organization_uid = %s;" 
+  db().execute(ins, (organization_uid,)) 
+
+
+def update(organization_uid, username, password, firstName="", lastName=""):
+  delete(organization_uid, username)
+  create(organization_uid, username, password, firstName, lastName)
   return ""
 
 def list(organization_uid):

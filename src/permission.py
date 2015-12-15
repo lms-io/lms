@@ -22,7 +22,15 @@ def revoke(user, permission):
   db().execute(ins, (user, permission))
   return ""
 
-def has(user, permission):
+def has(user, permissions):
+  if _has(user, "*"):
+    return True;
+  for permission in set(permissions):
+    if _has(user, permission):
+      return True;
+  raise ValueError('Permission Denied')
+
+def _has(user, permission):
   ins = "select * from user_permission where user= %s and permission=%s;"
   rows = db().execute(ins, (user, permission))
   return len(rows) > 0 
