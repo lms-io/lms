@@ -25,13 +25,6 @@ def create(organization_uid, username, password, firstName="", lastName=""):
   permission.grant(username, 'LOGIN')
   return ""
 
-def delete(organization_uid, username):
-  ins = "delete from user where username = %s;"
-  db().execute(ins, (username,))
-  ins = "delete from user_by_organization where organization_uid = %s;" 
-  db().execute(ins, (organization_uid,)) 
-
-
 def update(organization_uid, username, password, firstName="", lastName=""):
   delete(organization_uid, username)
   create(organization_uid, username, password, firstName, lastName)
@@ -43,4 +36,16 @@ def list(organization_uid):
   for r in rows:
     d.insert(0,{'username':r.user_username,'organization_uid':str(r.organization_uid)})
   return d
+
+def get(username):
+  r = appcontext.db().execute('SELECT username,firstName,lastName from user where username=%s', (username,))
+  d = {'username':r[0].username,'firstName':r[0].firstname,'lastName':r[0].lastname}
+  return d
+
+def delete(organization_uid, username):
+  ins = "delete from user where username = %s;"
+  db().execute(ins, (username,))
+  ins = "delete from user_by_organization where organization_uid = %s;" 
+  db().execute(ins, (organization_uid,)) 
+
 

@@ -105,7 +105,7 @@ def user_view(key="", username=""):
   permission.has(s.get('user'), ['USER','USER:VIEW', 'USER:VIEW:'+username])
 
   ret = user.get(username)
-  return callback(request,ret)
+  return callback(request,{'response':ret})
 
 @route('/<key>/user/<username>', method='POST')
 @err

@@ -95,10 +95,18 @@ def test_update_user():
 
   res = setup.app().get('/%s/auth/logout' % (key,) ) 
 
+  res = setup.app().post('/auth/login', {'username':'joe','password':'password','organization_uid':organization_uid}) 
+  print res.json.get('message')
+  assert res.json.get('status') == 'ERROR'
+  key = res.json.get('session')
+  assert key == None 
+
   res = setup.app().post('/auth/login', {'username':'joe','password':'password2','organization_uid':organization_uid}) 
   print res.json.get('message')
   assert res.json.get('status') == 'OK'
   key = res.json.get('session')
   assert key != None 
 
-
+  res = setup.app().get('/%s/user/%s' % (key,'joe') ) 
+  print res.json.get('response')
+  assert res.json.get('response').get('username') == 'joe'
