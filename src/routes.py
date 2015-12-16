@@ -1,7 +1,7 @@
 from bottle import route,request 
 from cassandra.cluster import Cluster
 
-import uuid, collections, traceback, bcrypt, requests, sys, appcontext, auth, organization, user, permission 
+import uuid, collections, traceback, bcrypt, requests, sys, appcontext, auth, organization, user, interaction, permission 
 
 def callback(r, v):
   if r.query.get('callback') is not None:
@@ -118,6 +118,48 @@ def user_update(key="", username=""):
   lastName = request.forms.get('lastName') 
   organization_uid = s.get('organization_uid')
   user.update(organization_uid, username, password, firstName, lastName)
+  return callback(request,{'status':'OK'})
+
+@route('/<key>/interactions')
+@err
+def interaction_list(key=""):
+  s = auth.session(key)
+  permission.has(s.get('user'), ['INTERACTION','INTERACTION:LIST'])
+
+  organization_uid = s.get('organization_uid')
+  res = interaction.list(organization_uid)   
+  return callback(request,{'status':'OK', 'res':res})
+
+@route('/<key>/interaction', method='POST')
+@err
+def interaction_add(key=""):
+  s = auth.session(key)
+  permission.has(s.get('user'), ['INTERACTION','INTERACTION:CREATE'])
+
+  name = request.forms.get('name') 
+  url = request.forms.get('url') 
+  uid = interaction.create(organization_uid, name, url)
+  return callback(request,{'uid':uid})
+
+@route('/<key>/interaction/<uid>', method='GET')
+@err
+def interaction_view(key="", uid=""):
+  s = auth.session(key)
+  permission.has(s.get('user'), ['INTERACTION','INTERACTION:VIEW', 'INTERACTION:VIEW:'+uid])
+
+  ret = interaction.get(uid)
+  return callback(request,{'response':ret})
+
+@route('/<key>/interaction/<uid>', method='POST')
+@err
+def interaction_update(key="", uid=""):
+  s = auth.session(key)
+  permission.has(s.get('user'), ['INTERACTION','INTERACTION:UPDATE', 'INTERACTION:UPDATE:'+uid])
+
+  url = request.forms.get('url') 
+  name = request.forms.get('name') 
+  organization_uid = s.get('organization_uid')
+  interaction.update(organization_uid, uid, name, url)
   return callback(request,{'status':'OK'})
 
 

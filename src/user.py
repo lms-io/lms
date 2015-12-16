@@ -45,7 +45,7 @@ def get(username):
 def delete(organization_uid, username):
   ins = "delete from user where username = %s;"
   db().execute(ins, (username,))
-  ins = "delete from user_by_organization where organization_uid = %s;" 
-  db().execute(ins, (organization_uid,)) 
+  ins = "delete from user_by_organization where organization_uid = %s and user_username = %s;" 
+  db().execute(ins, (organization_uid,username)) 
 
 

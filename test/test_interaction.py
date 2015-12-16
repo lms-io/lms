@@ -1,37 +1,60 @@
-from cassandra.cluster import Cluster
-import random, os, uuid
+import random, os, uuid, bcrypt, sys, inspect, setup, configparser
 
-ks = ''.join(random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(16))
+from cassandra.cluster import Cluster
+from webtest import TestApp
+
+config = configparser.ConfigParser()
+config.read('config.ini')
+
+syskey = config.get('application','syskey')
 
 def test_insert():
-  cluster = Cluster()
-  session = cluster.connect()
-  kscql = """
-  CREATE KEYSPACE %s 
-  WITH REPLICATION = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 };
-  """ % (ks)
+  res = setup.app().post('/%s/organization' % (syskey,), {'name':'testcorp', 'admin_username':'joe', 'admin_password':'password'})
+  organization_uid = str(res.json.get('uid'))
 
-  session.execute(kscql)
+  res = setup.app().post('/auth/login', {'username':'joe','password':'password','organization_uid':organization_uid}) 
+  key = res.json.get('session')
 
-  session = cluster.connect(ks)
-  organization_uid = str(uuid.uuid1())
+  setup.app().post('/%s/interaction', {'name':'interaction1','url':'url','organization_uid':organization_uid}) 
+  setup.app().post('/%s/interaction', {'name':'interaction2','url':'url','organization_uid':organization_uid}) 
+  setup.app().post('/%s/interaction', {'name':'interaction3','url':'url','organization_uid':organization_uid}) 
 
-  for name in os.listdir("cassandra"):
-    if name.endswith(".cql"):
-      with open("cassandra/" + name) as f:
-        out = f.read()
-        session.execute(out)
-
-  insert = "insert into interaction (organization_uid, uid, url) values (%s, %s, %s)"
-  session.execute(insert, (organization_uid, str(uuid.uuid1()), "http://google.com/?q=abc1"))
-  session.execute(insert, (organization_uid, str(uuid.uuid1()), "http://google.com/?q=abc2"))
-  session.execute(insert, (organization_uid, str(uuid.uuid1()), "http://google.com/?q=abc3"))
-
-  rows = session.execute('SELECT organization_uid, uid, url FROM interaction')
-  d = [] 
-  for r in rows:
-    d.insert(0,{'uid':r.uid,'url':r.url})
-
-  print d
+  res = setup.app().get('/%s/interactions' % (key,) ) 
+  print res.json.get('message')
+  print res.json.get('res')
+  assert res.json.get('status') == 'OK' 
 
 
+
+def test_get_all_interactions():
+  res = setup.app().post('/%s/organization' % (syskey,), {'name':'testcorp', 'admin_username':'joe', 'admin_password':'password'})
+  organization_uid = str(res.json.get('uid'))
+
+  res = setup.app().post('/auth/login', {'username':'joe','password':'password','organization_uid':organization_uid}) 
+  key = res.json.get('session')
+
+
+  res = setup.app().get('/%s/interactions' % (key,) ) 
+  print res.json.get('message')
+  print res.json.get('res')
+  assert res.json.get('status') == 'OK' 
+
+def test_update_interaction():
+  res = setup.app().post('/%s/organization' % (syskey,), {'name':'testcorp', 'admin_username':'joe', 'admin_password':'password'})
+  organization_uid = str(res.json.get('uid'))
+
+  res = setup.app().post('/auth/login', {'username':'joe','password':'password','organization_uid':organization_uid}) 
+  key = res.json.get('session')
+
+  res = setup.app().post('/%s/interaction', {'name':'interaction1','url':'url','organization_uid':organization_uid}) 
+  interaction_uid = str(res.json.get('uid'))
+  
+  print interaction_uid
+  res = setup.app().post('/%s/interaction/%s' % (key,interaction_uid), {'url':'url2'})
+  print res.json.get('message')
+  print res.json.get('res')
+  assert res.json.get('status') == 'OK' 
+
+  res = setup.app().get('/%s/interaction/%s' % (key,interaction_uid) ) 
+  print res.json.get('response')
+  assert res.json.get('response').get('url') == 'url2'
