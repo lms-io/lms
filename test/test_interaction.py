@@ -21,9 +21,7 @@ def test_insert():
 
   res = setup.app().get('/%s/interactions' % (key,) ) 
   print res.json.get('message')
-  print res.json.get('res')
   assert res.json.get('status') == 'OK' 
-
 
 
 def test_get_all_interactions():
@@ -35,8 +33,6 @@ def test_get_all_interactions():
 
 
   res = setup.app().get('/%s/interactions' % (key,) ) 
-  print res.json.get('message')
-  print res.json.get('res')
   assert res.json.get('status') == 'OK' 
 
 def test_update_interaction():
@@ -46,15 +42,13 @@ def test_update_interaction():
   res = setup.app().post('/auth/login', {'username':'joe','password':'password','organization_uid':organization_uid}) 
   key = res.json.get('session')
 
-  res = setup.app().post('/%s/interaction', {'name':'interaction1','url':'url','organization_uid':organization_uid}) 
+  res = setup.app().post('/%s/interaction' % (key,), {'name':'interaction1','url':'url','organization_uid':organization_uid}) 
   interaction_uid = str(res.json.get('uid'))
-  
-  print interaction_uid
-  res = setup.app().post('/%s/interaction/%s' % (key,interaction_uid), {'url':'url2'})
   print res.json.get('message')
-  print res.json.get('res')
+  print "interaction:" + interaction_uid
+  res = setup.app().post('/%s/interaction/%s' % (key,interaction_uid), {'url':'url2'})
   assert res.json.get('status') == 'OK' 
 
   res = setup.app().get('/%s/interaction/%s' % (key,interaction_uid) ) 
-  print res.json.get('response')
+  print res.json.get('message')
   assert res.json.get('response').get('url') == 'url2'

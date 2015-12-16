@@ -136,6 +136,7 @@ def interaction_add(key=""):
   s = auth.session(key)
   permission.has(s.get('user'), ['INTERACTION','INTERACTION:CREATE'])
 
+  organization_uid = s.get('organization_uid')
   name = request.forms.get('name') 
   url = request.forms.get('url') 
   uid = interaction.create(organization_uid, name, url)
