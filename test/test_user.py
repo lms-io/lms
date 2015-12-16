@@ -40,6 +40,7 @@ def test_login():
   assert res.json.get('session') == None 
 
   res = setup.app().post('/auth/login', {'username':'joe','password':'password','organization_uid':organization_uid}) 
+  print res.json
   key = res.json.get('session')
   assert res.json.get('status') == 'OK'
   assert key != None 

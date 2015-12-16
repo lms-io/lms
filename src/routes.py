@@ -47,15 +47,15 @@ def admn_organization(key="" ):
 def auth_login():
   username = request.forms.get('username') 
   password = request.forms.get('password') 
-  organization_uid = request.forms.get('organization_uid') 
 
   if username is None or password is None:
     return callback(request,{'status':'INVALID'})
 
-  match = user.exists(organization_uid, username, password)
+  match = user.exists(username, password)
 
   if match:
     permission.has(username, ['LOGIN'])
+    organization_uid = user.get(username).get('organization_uid')
     key = auth.createSession(organization_uid,username)
     return callback(request,{'status':'OK', 'session':key})
 

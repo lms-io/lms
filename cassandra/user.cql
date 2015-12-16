@@ -1,7 +1,9 @@
 CREATE TABLE user (
   organization_uid text,
-  username text primary key,
+  username text, 
   firstName text,
   lastName text,
-  password text
+  password text,
+  PRIMARY KEY(username, organization_uid)
 );
+
