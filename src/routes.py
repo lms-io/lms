@@ -1,7 +1,7 @@
 from bottle import route,request 
 from cassandra.cluster import Cluster
 
-import uuid, collections, traceback, bcrypt, requests, sys, appcontext, auth, organization, user, interaction, campaign, permission 
+import uuid, collections, traceback, bcrypt, requests, sys, appcontext, auth, organization, user, interaction, campaign, group, permission 
 
 def callback(r, v):
   if r.query.get('callback') is not None:
@@ -219,5 +219,53 @@ def campaign_update(key="", uid=""):
   organization_uid = s.get('organization_uid')
   campaign.update(organization_uid, uid, name, type)
   ret = campaign.get(uid)
+  return callback(request,{'status':'OK'})
+
+###############################################################################
+# GROUP
+###############################################################################
+
+@route('/<key>/groups')
+@err
+def group_list(key=""):
+  s = auth.session(key)
+  permission.has(s.get('user'), ['GROUP','GROUP:LIST'])
+
+  organization_uid = s.get('organization_uid')
+  res = group.list(organization_uid)   
+  return callback(request,{'status':'OK', 'res':res})
+
+@route('/<key>/group', method='POST')
+@err
+def group_add(key=""):
+  s = auth.session(key)
+  permission.has(s.get('user'), ['GROUP','GROUP:CREATE'])
+
+  organization_uid = s.get('organization_uid')
+  name = request.forms.get('name') 
+  type = request.forms.get('type') 
+  uid = group.create(organization_uid, name, type)
+  return callback(request,{'uid':uid})
+
+@route('/<key>/group/<uid>', method='GET')
+@err
+def group_view(key="", uid=""):
+  s = auth.session(key)
+  permission.has(s.get('user'), ['GROUP','GROUP:VIEW', 'GROUP:VIEW:'+uid])
+
+  organization_uid = s.get('organization_uid')
+  ret = group.get(organization_uid,uid)
+  return callback(request,{'response':ret})
+
+@route('/<key>/group/<uid>', method='POST')
+@err
+def group_update(key="", uid=""):
+  s = auth.session(key)
+  permission.has(s.get('user'), ['GROUP','GROUP:UPDATE', 'GROUP:UPDATE:'+uid])
+  type = request.forms.get('type')
+  name = request.forms.get('name')
+  organization_uid = s.get('organization_uid')
+  group.update(organization_uid, uid, name, type)
+  ret = group.get(uid)
   return callback(request,{'status':'OK'})
 
