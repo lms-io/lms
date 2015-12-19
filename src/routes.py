@@ -1,7 +1,7 @@
 from bottle import route,request 
 from cassandra.cluster import Cluster
 
-import uuid, collections, traceback, bcrypt, requests, sys, appcontext, auth, organization, user, interaction, campaign, group, permission 
+import uuid, collections, traceback, bcrypt, requests, sys, appcontext, auth, organization, user, interaction, course, lesson, program, permission 
 
 def callback(r, v):
   if r.query.get('callback') is not None:
@@ -174,98 +174,148 @@ def interaction_update(key="", uid=""):
   return callback(request,{'status':'OK'})
 
 ###############################################################################
-# CAMPAIGN
+# LESSON
+# A lesson is a group of interactions
 ###############################################################################
 
-@route('/<key>/campaigns')
+@route('/<key>/lessons')
 @err
-def campaign_list(key=""):
+def lesson_list(key=""):
   s = auth.session(key)
-  permission.has(s.get('user'), ['CAMPAIGN','CAMPAIGN:LIST'])
+  permission.has(s.get('user'), ['LESSON','LESSON:LIST'])
 
   organization_uid = s.get('organization_uid')
-  res = campaign.list(organization_uid)   
+  res = lesson.list(organization_uid)   
   return callback(request,{'status':'OK', 'res':res})
 
-@route('/<key>/campaign', method='POST')
+@route('/<key>/lesson', method='POST')
 @err
-def campaign_add(key=""):
+def lesson_add(key=""):
   s = auth.session(key)
-  permission.has(s.get('user'), ['CAMPAIGN','CAMPAIGN:CREATE'])
+  permission.has(s.get('user'), ['LESSON','LESSON:CREATE'])
 
   organization_uid = s.get('organization_uid')
   name = request.forms.get('name') 
   type = request.forms.get('type') 
-  uid = campaign.create(organization_uid, name, type)
+  uid = lesson.create(organization_uid, name, type)
   return callback(request,{'uid':uid})
 
-@route('/<key>/campaign/<uid>', method='GET')
+@route('/<key>/lesson/<uid>', method='GET')
 @err
-def campaign_view(key="", uid=""):
+def lesson_view(key="", uid=""):
   s = auth.session(key)
-  permission.has(s.get('user'), ['CAMPAIGN','CAMPAIGN:VIEW', 'CAMPAIGN:VIEW:'+uid])
+  permission.has(s.get('user'), ['LESSON','LESSON:VIEW', 'LESSON:VIEW:'+uid])
 
   organization_uid = s.get('organization_uid')
-  ret = campaign.get(organization_uid,uid)
+  ret = lesson.get(organization_uid,uid)
   return callback(request,{'response':ret})
 
-@route('/<key>/campaign/<uid>', method='POST')
+@route('/<key>/lesson/<uid>', method='POST')
 @err
-def campaign_update(key="", uid=""):
+def lesson_update(key="", uid=""):
   s = auth.session(key)
-  permission.has(s.get('user'), ['CAMPAIGN','CAMPAIGN:UPDATE', 'CAMPAIGN:UPDATE:'+uid])
+  permission.has(s.get('user'), ['LESSON','LESSON:UPDATE', 'LESSON:UPDATE:'+uid])
   type = request.forms.get('type')
   name = request.forms.get('name')
   organization_uid = s.get('organization_uid')
-  campaign.update(organization_uid, uid, name, type)
-  ret = campaign.get(uid)
+  lesson.update(organization_uid, uid, name, type)
+  ret = lesson.get(uid)
   return callback(request,{'status':'OK'})
 
 ###############################################################################
-# GROUP
+# COURSE
+# A course is a group of lessons
 ###############################################################################
 
-@route('/<key>/groups')
+@route('/<key>/courses')
 @err
-def group_list(key=""):
+def course_list(key=""):
   s = auth.session(key)
-  permission.has(s.get('user'), ['GROUP','GROUP:LIST'])
+  permission.has(s.get('user'), ['COURSE','COURSE:LIST'])
 
   organization_uid = s.get('organization_uid')
-  res = group.list(organization_uid)   
+  res = course.list(organization_uid)   
   return callback(request,{'status':'OK', 'res':res})
 
-@route('/<key>/group', method='POST')
+@route('/<key>/course', method='POST')
 @err
-def group_add(key=""):
+def course_add(key=""):
   s = auth.session(key)
-  permission.has(s.get('user'), ['GROUP','GROUP:CREATE'])
+  permission.has(s.get('user'), ['COURSE','COURSE:CREATE'])
 
   organization_uid = s.get('organization_uid')
   name = request.forms.get('name') 
   type = request.forms.get('type') 
-  uid = group.create(organization_uid, name, type)
+  uid = course.create(organization_uid, name, type)
   return callback(request,{'uid':uid})
 
-@route('/<key>/group/<uid>', method='GET')
+@route('/<key>/course/<uid>', method='GET')
 @err
-def group_view(key="", uid=""):
+def course_view(key="", uid=""):
   s = auth.session(key)
-  permission.has(s.get('user'), ['GROUP','GROUP:VIEW', 'GROUP:VIEW:'+uid])
+  permission.has(s.get('user'), ['COURSE','COURSE:VIEW', 'COURSE:VIEW:'+uid])
 
   organization_uid = s.get('organization_uid')
-  ret = group.get(organization_uid,uid)
+  ret = course.get(organization_uid,uid)
   return callback(request,{'response':ret})
 
-@route('/<key>/group/<uid>', method='POST')
+@route('/<key>/course/<uid>', method='POST')
 @err
-def group_update(key="", uid=""):
+def course_update(key="", uid=""):
   s = auth.session(key)
-  permission.has(s.get('user'), ['GROUP','GROUP:UPDATE', 'GROUP:UPDATE:'+uid])
+  permission.has(s.get('user'), ['COURSE','COURSE:UPDATE', 'COURSE:UPDATE:'+uid])
   type = request.forms.get('type')
   name = request.forms.get('name')
   organization_uid = s.get('organization_uid')
-  group.update(organization_uid, uid, name, type)
-  ret = group.get(uid)
+  course.update(organization_uid, uid, name, type)
+  ret = course.get(uid)
   return callback(request,{'status':'OK'})
+
+###############################################################################
+# PROGRAM 
+# An instance of a course with users 
+###############################################################################
+
+@route('/<key>/programs')
+@err
+def program_list(key=""):
+  s = auth.session(key)
+  permission.has(s.get('user'), ['PROGRAM','PROGRAM:LIST'])
+
+  organization_uid = s.get('organization_uid')
+  res = program.list(organization_uid)   
+  return callback(request,{'status':'OK', 'res':res})
+
+@route('/<key>/program', method='POST')
+@err
+def program_add(key=""):
+  s = auth.session(key)
+  permission.has(s.get('user'), ['PROGRAM','PROGRAM:CREATE'])
+
+  organization_uid = s.get('organization_uid')
+  name = request.forms.get('name') 
+  uid = program.create(organization_uid, name)
+  return callback(request,{'uid':uid})
+
+@route('/<key>/program/<uid>', method='GET')
+@err
+def program_view(key="", uid=""):
+  s = auth.session(key)
+  permission.has(s.get('user'), ['PROGRAM','PROGRAM:VIEW', 'PROGRAM:VIEW:'+uid])
+
+  organization_uid = s.get('organization_uid')
+  ret = program.get(organization_uid,uid)
+  return callback(request,{'response':ret})
+
+@route('/<key>/program/<uid>', method='POST')
+@err
+def program_update(key="", uid=""):
+  s = auth.session(key)
+  permission.has(s.get('user'), ['PROGRAM','PROGRAM:UPDATE', 'PROGRAM:UPDATE:'+uid])
+  name = request.forms.get('name')
+  organization_uid = s.get('organization_uid')
+  program.update(organization_uid, uid, name)
+  ret = program.get(uid)
+  return callback(request,{'status':'OK'})
+
 

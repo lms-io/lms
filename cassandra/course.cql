@@ -1,9 +1,9 @@
-CREATE TABLE campaign (
+CREATE TABLE course (
   organization_uid text,
   uid text,
   name text,
   type text,
-  interactions set<text>,
+  lessons set<text>,
   PRIMARY KEY(organization_uid, uid)
 );
 

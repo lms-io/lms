@@ -1,9 +1,8 @@
-CREATE TABLE interaction_by_group (
+CREATE TABLE program (
   organization_uid text,
+  course_uid text,
   uid text,
   name text,
-  type text,
-  interactions set<text>,
   PRIMARY KEY(organization_uid, uid)
 );
 
