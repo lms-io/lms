@@ -51,11 +51,10 @@ def auth_login():
   if username is None or password is None:
     return callback(request,{'status':'INVALID'})
 
-  match = user.exists(username, password)
+  organization_uid = user.exists(username, password)
 
-  if match:
+  if organization_uid:
     permission.has(username, ['LOGIN'])
-    organization_uid = user.get(username).get('organization_uid')
     key = auth.createSession(organization_uid,username)
     return callback(request,{'status':'OK', 'session':key})
 
@@ -104,7 +103,8 @@ def user_view(key="", username=""):
   s = auth.session(key)
   permission.has(s.get('user'), ['USER','USER:VIEW', 'USER:VIEW:'+username])
 
-  ret = user.get(username)
+  organization_uid = s.get('organization_uid')
+  ret = user.get(organization_uid, username)
   return callback(request,{'response':ret})
 
 @route('/<key>/user/<username>', method='POST')
@@ -148,7 +148,8 @@ def interaction_view(key="", uid=""):
   s = auth.session(key)
   permission.has(s.get('user'), ['INTERACTION','INTERACTION:VIEW', 'INTERACTION:VIEW:'+uid])
 
-  ret = interaction.get(uid)
+  organization_uid = s.get('organization_uid')
+  ret = interaction.get(organization_uid,uid)
   return callback(request,{'response':ret})
 
 @route('/<key>/interaction/update/<uid>', method='POST')

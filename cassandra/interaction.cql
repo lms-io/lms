@@ -3,7 +3,7 @@ CREATE TABLE interaction (
   uid text,
   name text,
   url text,
-  PRIMARY KEY(uid, organization_uid)
+  PRIMARY KEY(organization_uid, uid)
 );
 
 

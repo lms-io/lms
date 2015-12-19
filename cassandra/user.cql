@@ -4,6 +4,6 @@ CREATE TABLE user (
   firstName text,
   lastName text,
   password text,
-  PRIMARY KEY(username, organization_uid)
+  PRIMARY KEY(organization_uid, username)
 );
 

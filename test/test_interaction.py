@@ -45,6 +45,7 @@ def test_update_interaction():
   res = setup.app().post('/%s/interaction/create' % (key,), {'name':'interaction14','url':'url2'}) 
   interaction_uid = str(res.json.get('uid'))
   res = setup.app().get('/%s/interaction/view/%s' % (key,interaction_uid) ) 
+  print res.json
   print res.json.get('response')
   assert res.json.get('response').get('url') == 'url2'
 
