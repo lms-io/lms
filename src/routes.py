@@ -1,7 +1,7 @@
 from bottle import route,request 
 from cassandra.cluster import Cluster
 
-import uuid, collections, traceback, bcrypt, requests, sys, appcontext, auth, organization, user, interaction, permission 
+import uuid, collections, traceback, bcrypt, requests, sys, appcontext, auth, organization, user, interaction, campaign, permission 
 
 def callback(r, v):
   if r.query.get('callback') is not None:
@@ -73,6 +73,11 @@ def auth_logout(key=""):
   return callback(request,{'status':'OK'})
 
 # API 
+
+###############################################################################
+# USER 
+###############################################################################
+
 @route('/<key>/users')
 @err
 def user_list(key=""):
@@ -120,6 +125,10 @@ def user_update(key="", username=""):
   user.update(organization_uid, username, password, firstName, lastName)
   return callback(request,{'status':'OK'})
 
+###############################################################################
+# INTERACTION
+###############################################################################
+
 @route('/<key>/interactions')
 @err
 def interaction_list(key=""):
@@ -130,7 +139,7 @@ def interaction_list(key=""):
   res = interaction.list(organization_uid)   
   return callback(request,{'status':'OK', 'res':res})
 
-@route('/<key>/interaction/create', method='POST')
+@route('/<key>/interaction', method='POST')
 @err
 def interaction_add(key=""):
   s = auth.session(key)
@@ -142,7 +151,7 @@ def interaction_add(key=""):
   uid = interaction.create(organization_uid, name, url)
   return callback(request,{'uid':uid})
 
-@route('/<key>/interaction/view/<uid>', method='GET')
+@route('/<key>/interaction/<uid>', method='GET')
 @err
 def interaction_view(key="", uid=""):
   s = auth.session(key)
@@ -152,7 +161,7 @@ def interaction_view(key="", uid=""):
   ret = interaction.get(organization_uid,uid)
   return callback(request,{'response':ret})
 
-@route('/<key>/interaction/update/<uid>', method='POST')
+@route('/<key>/interaction/<uid>', method='POST')
 @err
 def interaction_update(key="", uid=""):
   s = auth.session(key)
@@ -162,5 +171,53 @@ def interaction_update(key="", uid=""):
   organization_uid = s.get('organization_uid')
   interaction.update(organization_uid, uid, name, url)
   ret = interaction.get(uid)
-  return callback(request,{'status':'OK', 'response':ret})
+  return callback(request,{'status':'OK'})
+
+###############################################################################
+# CAMPAIGN
+###############################################################################
+
+@route('/<key>/campaigns')
+@err
+def campaign_list(key=""):
+  s = auth.session(key)
+  permission.has(s.get('user'), ['CAMPAIGN','CAMPAIGN:LIST'])
+
+  organization_uid = s.get('organization_uid')
+  res = campaign.list(organization_uid)   
+  return callback(request,{'status':'OK', 'res':res})
+
+@route('/<key>/campaign', method='POST')
+@err
+def campaign_add(key=""):
+  s = auth.session(key)
+  permission.has(s.get('user'), ['CAMPAIGN','CAMPAIGN:CREATE'])
+
+  organization_uid = s.get('organization_uid')
+  name = request.forms.get('name') 
+  type = request.forms.get('type') 
+  uid = campaign.create(organization_uid, name, type)
+  return callback(request,{'uid':uid})
+
+@route('/<key>/campaign/<uid>', method='GET')
+@err
+def campaign_view(key="", uid=""):
+  s = auth.session(key)
+  permission.has(s.get('user'), ['CAMPAIGN','CAMPAIGN:VIEW', 'CAMPAIGN:VIEW:'+uid])
+
+  organization_uid = s.get('organization_uid')
+  ret = campaign.get(organization_uid,uid)
+  return callback(request,{'response':ret})
+
+@route('/<key>/campaign/<uid>', method='POST')
+@err
+def campaign_update(key="", uid=""):
+  s = auth.session(key)
+  permission.has(s.get('user'), ['CAMPAIGN','CAMPAIGN:UPDATE', 'CAMPAIGN:UPDATE:'+uid])
+  type = request.forms.get('type')
+  name = request.forms.get('name')
+  organization_uid = s.get('organization_uid')
+  campaign.update(organization_uid, uid, name, type)
+  ret = campaign.get(uid)
+  return callback(request,{'status':'OK'})
 
