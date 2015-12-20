@@ -11,10 +11,10 @@ def redis():
 def db():
   return appcontext.db()
 
-def create(organization_uid, name, type):
+def create(organization_uid, name, type, interactions):
   lesson_uid = str(uuid.uuid1())
-  ins = "INSERT INTO lesson (organization_uid,uid, name, type) VALUES (%s,%s,%s,%s);"
-  db().execute(ins, (organization_uid, lesson_uid, name, type))
+  ins = "INSERT INTO lesson (organization_uid,uid, name, type, interactions) VALUES (%s,%s,%s,%s,%s);"
+  db().execute(ins, (organization_uid, lesson_uid, name, type, interactions))
 
   return lesson_uid 
 
@@ -32,9 +32,15 @@ def list(organization_uid):
   return d
 
 def get(organization_uid,uid):
-  r = appcontext.db().execute('SELECT name, type, uid, organization_uid from lesson where uid=%s and organization_uid=%s', (uid,organization_uid))
-  d = {'name':r[0].name,'type':r[0].type,'uid':r[0].uid, 'organization_uid':r[0].organization_uid}
-  return d
+  r = appcontext.db().execute('SELECT name, type, uid, interactions, organization_uid from lesson where uid=%s and organization_uid=%s', (uid,organization_uid))
+
+  intrs = []
+  for intr in r[0].interactions:
+    intrs.insert(0,intr)
+
+  d = {'name':r[0].name,'type':r[0].type,'uid':r[0].uid, 'organization_uid':r[0].organization_uid, 'interactions':intrs}
+  
+  return d 
 
 def delete(organization_uid, lesson_uid):
   ins = "delete from lesson where uid = %s;"

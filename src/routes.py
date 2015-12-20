@@ -86,7 +86,7 @@ def user_list(key=""):
 
   organization_uid = s.get('organization_uid')
   res = user.list(organization_uid)   
-  return callback(request,{'status':'OK', 'res':res})
+  return callback(request,{'status':'OK', 'response':res})
 
 @route('/<key>/user', method='POST')
 @err
@@ -137,7 +137,7 @@ def interaction_list(key=""):
 
   organization_uid = s.get('organization_uid')
   res = interaction.list(organization_uid)   
-  return callback(request,{'status':'OK', 'res':res})
+  return callback(request,{'status':'OK', 'response':res})
 
 @route('/<key>/interaction', method='POST')
 @err
@@ -186,7 +186,7 @@ def lesson_list(key=""):
 
   organization_uid = s.get('organization_uid')
   res = lesson.list(organization_uid)   
-  return callback(request,{'status':'OK', 'res':res})
+  return callback(request,{'status':'OK', 'response':res})
 
 @route('/<key>/lesson', method='POST')
 @err
@@ -197,8 +197,9 @@ def lesson_add(key=""):
   organization_uid = s.get('organization_uid')
   name = request.forms.get('name') 
   type = request.forms.get('type') 
-  uid = lesson.create(organization_uid, name, type)
-  return callback(request,{'uid':uid})
+  interactions = set(request.forms.getall('interactions')) 
+  uid = lesson.create(organization_uid, name, type, interactions)
+  return callback(request,{'uid':uid, 'interactions':list(interactions)})
 
 @route('/<key>/lesson/<uid>', method='GET')
 @err
@@ -235,7 +236,7 @@ def course_list(key=""):
 
   organization_uid = s.get('organization_uid')
   res = course.list(organization_uid)   
-  return callback(request,{'status':'OK', 'res':res})
+  return callback(request,{'status':'OK', 'response':res})
 
 @route('/<key>/course', method='POST')
 @err
@@ -284,7 +285,7 @@ def program_list(key=""):
 
   organization_uid = s.get('organization_uid')
   res = program.list(organization_uid)   
-  return callback(request,{'status':'OK', 'res':res})
+  return callback(request,{'status':'OK', 'response':res})
 
 @route('/<key>/program', method='POST')
 @err
