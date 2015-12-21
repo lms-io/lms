@@ -18,9 +18,9 @@ def create(organization_uid, name, type, interactions):
 
   return lesson_uid 
 
-def update(organization_uid, lesson_uid, name, type):
-  ins = "update lesson set name=%s, type=%s where uid=%s and organization_uid=%s;"
-  db().execute(ins, (name, type, lesson_uid, organization_uid))
+def update(organization_uid, lesson_uid, name, type, interactions):
+  ins = "update lesson set name=%s, type=%s, interactions=%s where uid=%s and organization_uid=%s;"
+  db().execute(ins, (name, type, interactions, lesson_uid, organization_uid))
 
   return "" 
 

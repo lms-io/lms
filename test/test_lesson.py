@@ -40,5 +40,17 @@ def test_insert():
   print res.json.get('response')
   assert len(res.json.get('response').get('interactions')) == 3
 
+  res = setup.app().post('/%s/lesson/%s' % (key,lesson_uid), {'name':'test_insert_lesson','type':'type','organization_uid':organization_uid, 'interactions':[int1,int2]}) 
 
+  res = setup.app().get('/%s/lesson/%s' % (key,lesson_uid) ) 
+  print res.json.get('message')
+  print res.json.get('response')
+  assert len(res.json.get('response').get('interactions')) == 2 
 
+  res = setup.app().post('/%s/lesson/%s' % (key,lesson_uid), {'name':'test_insert_lesson','type':'type','organization_uid':organization_uid, 'interactions':[int1]}) 
+
+  res = setup.app().get('/%s/lesson/%s' % (key,lesson_uid) ) 
+  print res.json.get('message')
+  print res.json.get('response')
+
+  assert len(res.json.get('response').get('interactions')) == 1 

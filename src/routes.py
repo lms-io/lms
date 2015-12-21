@@ -219,7 +219,8 @@ def lesson_update(key="", uid=""):
   type = request.forms.get('type')
   name = request.forms.get('name')
   organization_uid = s.get('organization_uid')
-  lesson.update(organization_uid, uid, name, type)
+  interactions = set(request.forms.getall('interactions')) 
+  lesson.update(organization_uid, uid, name, type, interactions)
   ret = lesson.get(uid)
   return callback(request,{'status':'OK'})
 
@@ -247,7 +248,8 @@ def course_add(key=""):
   organization_uid = s.get('organization_uid')
   name = request.forms.get('name') 
   type = request.forms.get('type') 
-  uid = course.create(organization_uid, name, type)
+  lessons = set(request.forms.getall('lessons')) 
+  uid = course.create(organization_uid, name, type, lessons)
   return callback(request,{'uid':uid})
 
 @route('/<key>/course/<uid>', method='GET')
@@ -268,7 +270,8 @@ def course_update(key="", uid=""):
   type = request.forms.get('type')
   name = request.forms.get('name')
   organization_uid = s.get('organization_uid')
-  course.update(organization_uid, uid, name, type)
+  lessons = set(request.forms.getall('lessons')) 
+  course.update(organization_uid, uid, name, type, lessons)
   ret = course.get(uid)
   return callback(request,{'status':'OK'})
 
